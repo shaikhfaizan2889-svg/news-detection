@@ -3,18 +3,22 @@
 ## 📊 Project Overview
 
 A complete machine learning web application to detect fake news from text or URLs. The project includes:
-- **Backend**: Flask API with ML model (Random Forest - 99.73% accuracy)
+- **Backend**: Flask API with ML model (Support Vector Machine - 99.0% accuracy)
 - **Frontend**: React + TypeScript with shadcn-ui and Tailwind CSS
 
 ## 🏆 Model Comparison Results
 
+*Note: Models were recently retrained using advanced cleaning techniques to strip dataset-specific publisher artifacts (e.g. "WASHINGTON (Reuters) - "), forcing the models to evaluate actual linguistic structure rather than memorizing publisher names. The new unbiased performance metrics are below.*
+
 | Rank | Model | Accuracy |
 |------|-------|----------|
-| 🥇 1 | **Random Forest** | **99.73%** |
-| 🥈 2 | Gradient Boosting | 99.60% |
-| 🥉 3 | Decision Tree | 99.54% |
-| 4 | SVM (Linear) | 99.47% |
-| 5 | Logistic Regression | 99.01% |
+| 🥇 1 | **SVM (Linear)** | **99.00%** |
+| 🥈 2 | Random Forest | 98.71% |
+| 🥉 3 | Logistic Regression | 98.63% |
+| 4 | Gradient Boosting | 97.54% |
+| 5 | Naive Bayes (Multinomial) | 95.00% |
+| 6 | Decision Tree | 94.87% |
+| 7 | K-Nearest Neighbors | 90.21% |
 
 ## 📁 Project Structure
 
@@ -93,8 +97,7 @@ curl -X POST http://localhost:5000/api/detect \
 
 ### Example Response
 
-```
-json
+```json
 {
   "result": "FAKE",
   "is_fake": true,
@@ -102,8 +105,8 @@ json
   "confidence_fake": 98.5,
   "confidence_real": 1.5,
   "explanation": "Our AI detected sensationalist language...",
-  "model_used": "Random Forest",
-  "model_accuracy": 99.73
+  "model_used": "SVM (Linear)",
+  "model_accuracy": 99.00
 }
 ```
 
