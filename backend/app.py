@@ -40,8 +40,11 @@ except Exception as e:
 
 def clean_text(text):
     """Clean and preprocess text data (same as training)"""
-    if not text or pd.isna(text):
+    if not isinstance(text, str) or not text.strip():
         return ""
+    
+    # Remove datelines (e.g., "WASHINGTON (Reuters) - " or "LONDON (Reuters) -")
+    text = re.sub(r'^.*?\(.*?\)\s*-\s*', '', text)
     
     # Convert to lowercase
     text = text.lower()
@@ -108,7 +111,15 @@ def fetch_url_content(url):
     except Exception as e:
         raise Exception(f"Error processing URL content: {str(e)}")
 
-
+def get_probabilities(model, tfidf_matrix):
+    """Helper to get probabilities regardless of whether model has predict_proba"""
+    if hasattr(model, "predict_proba"):
+        return model.predict_proba(tfidf_matrix)[0]
+    else:
+        import math
+        decision = model.decision_function(tfidf_matrix)[0]
+        prob = 1 / (1 + math.exp(-decision))
+        return [1 - prob, prob]
 
 import pandas as pd
 
@@ -155,7 +166,7 @@ def detect_fake_news():
     
     # Make prediction
     prediction = model.predict(text_tfidf)[0]
-    probabilities = model.predict_proba(text_tfidf)[0]
+    probabilities = get_probabilities(model, text_tfidf)
     
     # Get confidence scores (as percentages, capped at 100)
     confidence_fake = min(float(probabilities[0]) * 100, 100.0)
@@ -220,7 +231,7 @@ def detect_fake_news_from_url():
         
         # Make prediction
         prediction = model.predict(text_tfidf)[0]
-        probabilities = model.predict_proba(text_tfidf)[0]
+        probabilities = get_probabilities(model, text_tfidf)
         
         # Get confidence scores (as percentages, capped at 100)
         confidence_fake = min(float(probabilities[0]) * 100, 100.0)
@@ -279,7 +290,7 @@ def detect_fake_news_batch():
         cleaned_text = clean_text(news_text)
         text_tfidf = tfidf.transform([cleaned_text])
         prediction = model.predict(text_tfidf)[0]
-        probabilities = model.predict_proba(text_tfidf)[0]
+        probabilities = get_probabilities(model, text_tfidf)
         
         is_fake = bool(prediction == 0)
         confidence = max(float(probabilities[0]), float(probabilities[1])) * 100

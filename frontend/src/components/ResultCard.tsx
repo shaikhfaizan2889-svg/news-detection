@@ -8,7 +8,7 @@ interface ResultCardProps {
 
 export function ResultCard({ result, index }: ResultCardProps) {
   const isFake = result.is_fake;
-  const pct = (result.confidence * 100).toFixed(1);
+  const pct = Number(result.confidence).toFixed(1);
 
   return (
     <div

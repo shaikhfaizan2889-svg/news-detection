@@ -87,6 +87,9 @@ def clean_text(text):
     if pd.isna(text):
         return ""
     
+    # Remove datelines (e.g., "WASHINGTON (Reuters) - " or "LONDON (Reuters) -")
+    text = re.sub(r'^.*?\(.*?\)\s*-\s*', '', text)
+    
     # Convert to lowercase
     text = text.lower()
     
@@ -349,7 +352,14 @@ for news in sample_news:
     news_tfidf = loaded_tfidf.transform([cleaned])
     # Predict
     prediction = loaded_model.predict(news_tfidf)[0]
-    probability = loaded_model.predict_proba(news_tfidf)[0]
+    
+    if hasattr(loaded_model, "predict_proba"):
+        probability = loaded_model.predict_proba(news_tfidf)[0]
+    else:
+        import math
+        decision = loaded_model.decision_function(news_tfidf)[0]
+        prob = 1 / (1 + math.exp(-decision))
+        probability = [1 - prob, prob]
     
     label = "TRUE" if prediction == 1 else "FAKE"
     confidence = max(probability) * 100
